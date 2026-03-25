@@ -4,8 +4,10 @@ import React, { useState } from 'react';
 import {StyleSheet, View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { User, GraduationCap, FileText, CreditCard, CheckCircle } from 'lucide-react-native';
 import { StepIndicator, StepItem } from './ui/stepIndicator';
-import { Typography, uselogincardtyles } from '../styles';
-import { GenericPillSelector } from './ui/pillSelector';
+import { Typography, uselogincardstyles } from '../styles';
+import GenericPillSelector, { System } from './ui/pillSelector';
+import NumberSelectorComponent from './ui/numberDropdown';
+
 
 const STEPS: StepItem[] = [
   { icon: User, Title: "Account", desc: "Info" },
@@ -13,11 +15,37 @@ const STEPS: StepItem[] = [
 ];
 
 export default function SignUpCard() {
-  const logincardstyles = uselogincardtyles();  
-  const [activeStep, setActiveStep] = useState(0);
-  const [academicSystem, setAcademicSystem] = useState<'Semester' | 'Trimester'>('Semester');
+  //Styling Hook
+  const logincardstyles = uselogincardstyles();
+  if (!logincardstyles) return null;  
+
+  // Form Hooks
+  const [academicSystem, setAcademicSystem] = useState('Semester'); // academic system
+  const [termLimit, setTermLimit] = useState<number>(2); 
+  const [selectedCount, setSelectedCount] = useState<number>(10);  // duration
+  const [currentYr, setCurrentYr] =useState<number>(1); //current year
+  const [currentTerm, setCurrentTerm] =useState<number>(1); //current term
+  const [phoneNum, setPhoneNum] = useState<string|null>(null); //phone number
+
+  // Navigation Hooks
+  const [activeStep, setActiveStep] = useState(0);  
   const nextStep = () => setActiveStep(prev => Math.min(STEPS.length - 1, prev + 1));
   const prevStep = () => setActiveStep(prev => Math.max(0, prev - 1));
+
+  //Handle Academic System and Terms
+  const handleSystemChange = (val: string) => {
+    setAcademicSystem(val);
+    if (val === "Semester")
+    {
+      setTermLimit(2);
+    }
+    else if (val === 'Trimester')
+    {
+      setTermLimit(3);
+    }
+  };
+
+  //Conditional Step Rendering
   const renderContent = () => {
     switch(activeStep)
     {
@@ -77,6 +105,13 @@ export default function SignUpCard() {
             placeholderTextColor={'#b1b1b1'}          
           />
         </View>
+        {/* next button */}
+        <TouchableOpacity 
+          style={[logincardstyles.button,{marginTop:12,marginBottom:0,flex:1}]}
+          onPress={() => nextStep()}
+        >
+          <Text style={[Typography.presets.Slogan,logincardstyles.buttonText]}>Next</Text>
+        </TouchableOpacity> 
         </View>);
       case 1:  
     }
@@ -94,16 +129,16 @@ export default function SignUpCard() {
             </TouchableOpacity>
         </View>
         {/* Step Indicator */}
-        {/* <View>
+        <View>
             <StepIndicator 
              steps={STEPS} 
              activeStep={activeStep} 
              onStepChange={(index)=> setActiveStep(index)} 
              />
-        </View> */}
+        </View>
 
       {/* STEP 2 */}
-        <View style={[{display:'flex',flexDirection:'column',width:'100%'}]}>       
+      <View style={[{display:'flex',flexDirection:'column',width:'100%'}]}>       
           {/* Course */}
         <View style={[{display:'flex',flexDirection:'row',gap:'12',width:'100%',marginBottom:12}]}>
             <View style={{flex:1}}>
@@ -121,14 +156,9 @@ export default function SignUpCard() {
 
             <View style={{flex:1}}>
             <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Duration in Years</Text>
-            <TextInput
-                style={[logincardstyles.input,{width:'100%'},Typography.presets.subtitle]}
-                // value={duration}
-                // onChangeText={setDuration}
-                placeholder="4"
-                placeholderTextColor={"#b1b1b1"}
-                keyboardType="default"
-                autoCapitalize='words'
+            <NumberSelectorComponent 
+              maxNumber={10} 
+              onNumberSelected={(num) => setSelectedCount(num)} 
             />
             </View>
         </View>
@@ -137,40 +167,31 @@ export default function SignUpCard() {
         <View style={logincardstyles.inputGroup}>
           <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Academic System?</Text>
           <GenericPillSelector
-            initialValue="Semester"
-            onSelectionChange={(val) => console.log(val)}
+            selectedValue={academicSystem} // Correct prop name
+            onSelectionChange={(val) => handleSystemChange(val as System)}
             options={[
               { label: 'Semester', value: 'Semester' },
               { label: 'Trimester', value: 'Trimester' },
             ]}
           />
+          
         </View>
 
       {/* Year and Sem */}
         <View style={[{display:'flex',flexDirection:'row',gap:'12',width:'100%',marginBottom:12}]}>
             <View style={{flex:1}}>
             <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Current Yr of Study</Text>
-            <TextInput
-                style={[logincardstyles.input,{width:'100%'},Typography.presets.subtitle]}
-                // value={Year}
-                // onChangeText={setYear}
-                placeholder="1"
-                placeholderTextColor={"#b1b1b1"}
-                keyboardType="default"
-                autoCapitalize='words'
+            <NumberSelectorComponent 
+              maxNumber={selectedCount} 
+              onNumberSelected={(num) => setCurrentYr(num)} 
             />
             </View>
 
             <View style={{flex:1}}>
-            <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Current Semester</Text>
-            <TextInput
-                style={[logincardstyles.input,{width:'100%'},Typography.presets.subtitle]}
-                // value={Sys}
-                // onChangeText={setSys}
-                placeholder="4"
-                placeholderTextColor={"#b1b1b1"}
-                keyboardType="default"
-                autoCapitalize='words'
+            <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Current {academicSystem}</Text>
+            <NumberSelectorComponent 
+              maxNumber={termLimit} 
+              onNumberSelected={(num) => setCurrentTerm(num)} 
             />
             </View>
         </View>
@@ -187,19 +208,32 @@ export default function SignUpCard() {
             placeholderTextColor={'#b1b1b1'}          
           />
         </View>
-        </View>  
 
 
 
-        {/* Next Button */}
-        <TouchableOpacity style={[logincardstyles.button,{marginTop:12,marginBottom:0}]}>
+      </View>
+
+      <View>
+        {activeStep === 0}
+      </View>
+      <View style={[{display:'flex',flexDirection:'row',gap:'12',width:'100%',marginBottom:12}]}>
+        <TouchableOpacity 
+          style={[logincardstyles.altbutton,{marginTop:12,marginBottom:0,flex:1}]}
+          onPress={() => prevStep()}
+        >
+        <Text 
+          style={[Typography.presets.Slogan,logincardstyles.buttonText,{color:'#000'}]}
+          >Back</Text>
+          </TouchableOpacity> 
+        <TouchableOpacity 
+            style={[logincardstyles.button,{marginTop:12,marginBottom:0,flex:1}]}
+            onPress={() => nextStep()}
+          >
           <Text 
-          style={[Typography.presets.Slogan,logincardstyles.buttonText]}
-          onPress={() => setActiveStep(prev => Math.min(STEPS.length - 1, prev + 1))}
-          >Next</Text>
-        </TouchableOpacity>
-        
-                
+            style={[Typography.presets.Slogan,logincardstyles.buttonText]}
+            >Next</Text>
+        </TouchableOpacity>   
+        </View>      
     </View>
 
     //     <View style={styles.card}>

@@ -44,7 +44,7 @@ const StepNode = ({
         isCompleted && styles.completedCircle,
       ]}>
         <Icon 
-          size={20} 
+          size={15} 
           color={isActive || isCompleted ? '#fff' : '#9ca3af'} 
         />
       </View>
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 20,
+    paddingVertical: 12,
     paddingHorizontal: 10,
     width: '100%',
   },
@@ -102,8 +102,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   circle: {
-    width: 48,
-    height: 48,
+    width: 30,
+    height: 30,
     borderRadius: 24,
     backgroundColor: '#f3f4f6',
     borderWidth: 2,
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     borderColor: '#3F344D',
   },
   connectorContainer: {
-    height: 48, // Matches circle height to center the line
+    height: 30, // Matches circle height to center the line
     justifyContent: 'center',
     flex: 0.5,
   },

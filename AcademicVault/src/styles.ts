@@ -194,6 +194,17 @@ const createlogincardstyles = (themeColors:ThemeColors) => StyleSheet.create({
     alignItems: 'center',
     marginBottom: 25,
   },
+  altbutton: {
+    backgroundColor: themeColors.altbutton.bg, // Darker dusty purple
+    width: '100%',
+    height: 43,
+    borderWidth:2,
+    borderColor:themeColors.altbutton.stroke,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 25,
+  },
   buttonText: {
     color: '#FFF',
     fontSize: 16,
@@ -210,7 +221,7 @@ const createlogincardstyles = (themeColors:ThemeColors) => StyleSheet.create({
     fontWeight: '600',
   },
 });
-export const uselogincardtyles = () => {
+export const uselogincardstyles = () => {
     const scheme = useColorScheme();
     return createlogincardstyles(getThemeColors(scheme));
 };

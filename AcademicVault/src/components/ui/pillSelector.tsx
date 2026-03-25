@@ -1,7 +1,6 @@
 // src/components/ui/GenericPillSelector.tsx
 
-import { Typography } from '@/src/styles';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,71 +9,64 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native';
+import { Typography } from '@/src/styles';
 
-// Define the interface for the individual options
+// 1. Export the type so the card can use it
+export type System = 'Semester' | 'Trimester';
+
 interface PillOption<T> {
   label: string;
   value: T;
 }
 
 interface GenericPillSelectorProps<T> {
-  options: [PillOption<T>, PillOption<T>]; // Strictly enforces 2 choices
-  initialValue: T;
+  options: [PillOption<T>, PillOption<T>]; 
+  selectedValue: T; // This must come from the Parent
   onSelectionChange: (value: T) => void;
   containerStyle?: StyleProp<ViewStyle>;
 }
 
-// --- Sub-component: Option (Defined Outside) ---
-const Option = <T,>({ 
-  label, 
-  value, 
-  isActive, 
-  onPress 
-}: { 
-  label: string; 
-  value: T; 
-  isActive: boolean; 
-  onPress: (val: T) => void 
-}) => {
-  return (
-    <TouchableOpacity
-      onPress={() => onPress(value)}
-      activeOpacity={0.8}
-      style={[styles.option, isActive && styles.activeOption]}
-    >
-      <Text style={[styles.text, isActive && styles.activeText,Typography.presets.subtitle]}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-};
-
-// --- Main Component ---
-export const GenericPillSelector = <T,>({
+/**
+ * A controlled 2-option pill selector with a single default export.
+ */
+const GenericPillSelector = <T,>({
   options,
-  initialValue,
+  selectedValue,
   onSelectionChange,
   containerStyle,
 }: GenericPillSelectorProps<T>) => {
-  const [activeValue, setActiveValue] = useState<T>(initialValue);
-
-  const handlePress = (value: T) => {
-    setActiveValue(value);
-    onSelectionChange(value);
-  };
+  
+  // Safety check: Ensure options exist before rendering
+  if (!options || options.length < 2) return null;
 
   return (
-    <View>
+    <View style={containerStyle}>
       <View style={styles.wrapper}>
-        {options.map((opt) => (
-          <Option
-            key={String(opt.value)}
-            label={opt.label}
-            value={opt.value}
-            isActive={activeValue === opt.value}
-            onPress={handlePress}
-          />
-        ))}
+        {options.map((opt) => {
+          const isActive = selectedValue === opt.value;
+
+          return (
+            <TouchableOpacity
+              key={String(opt.value)}
+              onPress={() => onSelectionChange(opt.value)}
+              activeOpacity={0.8}
+              style={[
+                styles.option, 
+                isActive && styles.activeOption
+              ]}
+            >
+              <Text 
+                style={[
+                  styles.text, 
+                  isActive && styles.activeText, 
+                  Typography.presets.subtitle
+                ]}
+              >
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -83,7 +75,7 @@ export const GenericPillSelector = <T,>({
 const styles = StyleSheet.create({
   wrapper: {
     flexDirection: 'row',
-    backgroundColor: '#7B5E7740', // Light grey background
+    backgroundColor: '#7B5E7740',
     borderRadius: 25,
     padding: 5,
     width: '100%',
@@ -91,15 +83,14 @@ const styles = StyleSheet.create({
   },
   option: {
     flex: 1,
-    paddingVertical: 1,
+    paddingVertical: 6, // Slightly larger for better touch area
     alignItems: 'center',
     borderRadius: 21,
   },
   activeOption: {
     backgroundColor: '#b76e7950',
-    borderWidth:1,
+    borderWidth: 1,
     borderColor: '#7b5e77',
-
   },
   text: {
     color: '#000',
@@ -109,3 +100,5 @@ const styles = StyleSheet.create({
     color: '#7B5E77',
   },
 });
+
+export default GenericPillSelector;
