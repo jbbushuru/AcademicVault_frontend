@@ -1,4 +1,4 @@
-//app/constants/theme.ts
+// src/constants/theme.ts
 
 import { Button } from "@react-navigation/elements";
 

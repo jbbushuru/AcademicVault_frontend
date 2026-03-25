@@ -1,4 +1,4 @@
-//app/screens/Login.tsx
+// src/screens/Login.tsx
 
 import LoginCard from "../components/logincard";
 import { SafeAreaView } from "react-native-safe-area-context";

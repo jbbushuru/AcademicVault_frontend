@@ -1,2 +1,0 @@
-//app/screens/Signup.tsx
-

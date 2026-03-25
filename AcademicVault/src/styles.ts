@@ -1,4 +1,4 @@
-//app/styles.ts
+// src/styles.ts
 
 import { Colors, ThemeColors } from "./constants/theme";
 import { StyleSheet,  Dimensions, useColorScheme} from "react-native";
@@ -11,6 +11,7 @@ export const theme = () => {
     const scheme = useColorScheme();
     return getThemeColors(scheme);
 };
+
 export const Typography = {
   fonts: {
     title: 'LoveYa',
@@ -151,14 +152,13 @@ const createlogincardstyles = (themeColors:ThemeColors) => StyleSheet.create({
   },
   title: {
     marginBottom:24,
-    flex: 0, 
     alignSelf: 'stretch',
     color: '#000',
     textAlign:'center',
   },
   inputGroup: {
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   label: {
     color:themeColors.label,

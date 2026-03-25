@@ -1,4 +1,4 @@
-//app/components/logincard.tsx
+//src/components/logincard.tsx
 
 import React, { useState } from 'react';
 import { Typography } from '../styles';
@@ -41,7 +41,7 @@ const LoginCard = () => {
             style={logincardstyles.input}
             // value={password}
             // onChangeText={setPassword}
-            placeholder='......'
+            placeholder='••••••••'
             secureTextEntry
             
           />
