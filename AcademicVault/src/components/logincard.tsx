@@ -8,12 +8,12 @@ import {
   TextInput, 
   TouchableOpacity, 
 } from 'react-native';
-import { uselogincardtyles } from '../styles';
+import { uselogincardstyles } from '../styles';
 
 
 const LoginCard = () => {
   const [password, setPassword] = useState('123456');
-  const logincardstyles = uselogincardtyles();
+  const logincardstyles = uselogincardstyles();
   
   return (
     
