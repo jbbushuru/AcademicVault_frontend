@@ -3,6 +3,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { LucideIcon, Check } from 'lucide-react-native';
+import { Typography } from '@/src/styles';
 
 export interface StepItem {
   icon: LucideIcon;
@@ -37,6 +38,16 @@ const StepNode = ({
       onPress={() => onPress(index)}
       activeOpacity={0.7}
     >
+      {/* Connector Lines */}
+      <View style={[
+        styles.absoluteLeftLine,
+        (isActive || isCompleted) && styles.completedConnector
+      ]} />
+      <View style={[
+        styles.absoluteRightLine,
+        isCompleted && styles.completedConnector
+      ]} />
+
       {/* Circle */}
       <View style={[
         styles.circle,
@@ -51,6 +62,7 @@ const StepNode = ({
 
       {/* Labels */}
       <Text style={[
+        Typography.presets.Slogan,
         styles.title,
         isActive && styles.activeTitle,
         isCompleted && styles.completedTitle
@@ -67,23 +79,14 @@ export const StepIndicator = ({ steps, activeStep, onStepChange }: StepIndicator
   return (
     <View style={styles.container}>
       {steps.map((step, index) => (
-        <React.Fragment key={index}>
-          <StepNode
-            step={step}
-            isActive={activeStep === index}
-            isCompleted={index < activeStep}
-            index={index}
-            onPress={(i) => onStepChange?.(i)}
-          />
-          {index < steps.length - 1 && (
-            <View style={styles.connectorContainer}>
-              <View style={[
-                styles.connector,
-                index < activeStep && styles.completedConnector
-              ]} />
-            </View>
-          )}
-        </React.Fragment>
+        <StepNode
+          key={index}
+          step={step}
+          isActive={activeStep === index}
+          isCompleted={index < activeStep}
+          index={index}
+          onPress={(i) => onStepChange?.(i)}
+        />
       ))}
     </View>
   );
@@ -101,6 +104,24 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
+  absoluteLeftLine: {
+    position: 'absolute',
+    left: 0,
+    right: '50%',
+    top: 14,
+    height: 2,
+    backgroundColor: '#e5e7eb',
+    zIndex: -1,
+  },
+  absoluteRightLine: {
+    position: 'absolute',
+    left: '50%',
+    right: 0,
+    top: 14,
+    height: 2,
+    backgroundColor: '#e5e7eb',
+    zIndex: -1,
+  },
   circle: {
     width: 30,
     height: 30,
@@ -112,7 +133,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   activeCircle: {
-    backgroundColor: '#7f6c88',
+    backgroundColor: '#9d8ba5ff',
     borderColor: '#5d4a66',
     transform: [{ scale: 1.1 }],
     elevation: 4,
@@ -122,18 +143,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   completedCircle: {
-    backgroundColor: '#5d4a66',
-    borderColor: '#3F344D',
-  },
-  connectorContainer: {
-    height: 30, // Matches circle height to center the line
-    justifyContent: 'center',
-    flex: 0.5,
-  },
-  connector: {
-    height: 2,
-    backgroundColor: '#e5e7eb',
-    marginHorizontal: -10,
+    backgroundColor: '#7f6c88',
+    borderColor: '#5d4a66',
   },
   completedConnector: {
     backgroundColor: '#7f6c88',
@@ -143,7 +154,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: '#6b7280',
     textAlign: 'center',
-    fontWeight: '600',
   },
   activeTitle: { color: '#3F344D' },
   completedTitle: { color: '#5d4a66' },

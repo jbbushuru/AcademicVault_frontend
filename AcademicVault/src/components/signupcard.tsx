@@ -1,267 +1,284 @@
 // src/components/signupcard.tsx
 
+import { GraduationCap, User } from 'lucide-react-native';
 import React, { useState } from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, TextInput } from 'react-native';
-import { User, GraduationCap, FileText, CreditCard, CheckCircle } from 'lucide-react-native';
-import { StepIndicator, StepItem } from './ui/stepIndicator';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Typography, uselogincardstyles } from '../styles';
-import GenericPillSelector, { System } from './ui/pillSelector';
 import NumberSelectorComponent from './ui/numberDropdown';
+import GenericPillSelector, { System } from './ui/pillSelector';
+import { StepIndicator, StepItem } from './ui/stepIndicator';
 
 
 const STEPS: StepItem[] = [
-  { icon: User, Title: "Account", desc: "Info" },
-  { icon: GraduationCap, Title: "Academics", desc: "Details" },
+  { icon: User, Title: "Account", desc: "Basic Information" },
+  { icon: GraduationCap, Title: "Academics", desc: "Your Academic Details" },
 ];
 
 export default function SignUpCard() {
   //Styling Hook
   const logincardstyles = uselogincardstyles();
-  if (!logincardstyles) return null;  
+  if (!logincardstyles) return null;
 
   // Form Hooks
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [fname, setFname] = useState<string | null>(null); //first name
+  const [lname, setLname] = useState<string | null>(null); //last name
+  const [email, setEmail] = useState<string | null>(null); //email address
+  const [password, setPassword] = useState<string | null>(null); //password
+  const [course, setCourse] = useState<string | null>(null); //course of study
   const [academicSystem, setAcademicSystem] = useState('Semester'); // academic system
-  const [termLimit, setTermLimit] = useState<number>(2); 
+  const [termLimit, setTermLimit] = useState<number>(2);
   const [selectedCount, setSelectedCount] = useState<number>(10);  // duration
-  const [currentYr, setCurrentYr] =useState<number>(1); //current year
-  const [currentTerm, setCurrentTerm] =useState<number>(1); //current term
-  const [phoneNum, setPhoneNum] = useState<string|null>(null); //phone number
+  const [duration, setDuration] = useState<number|null>(null);
+  const [currentYr, setCurrentYr] = useState<number|null>(null); //current year
+  const [currentTerm, setCurrentTerm] = useState<number|null>(null); //current term
+  const [phoneNum, setPhoneNum] = useState<string | null>(null); //phone number
 
   // Navigation Hooks
-  const [activeStep, setActiveStep] = useState(0);  
+  const [activeStep, setActiveStep] = useState(0);
   const nextStep = () => setActiveStep(prev => Math.min(STEPS.length - 1, prev + 1));
   const prevStep = () => setActiveStep(prev => Math.max(0, prev - 1));
 
   //Handle Academic System and Terms
   const handleSystemChange = (val: string) => {
     setAcademicSystem(val);
-    if (val === "Semester")
-    {
+    if (val === "Semester") {
       setTermLimit(2);
     }
-    else if (val === 'Trimester')
-    {
+    else if (val === 'Trimester') {
       setTermLimit(3);
     }
   };
 
+  const validateStep1 = () => {
+    const newErrors: Record<string, string> = {};
+    if (!fname || !fname.trim()) newErrors.fname = 'First name is required';
+    if (!lname || !lname.trim()) newErrors.lname = 'Last name is required';
+    if (!email || !email.trim() || !/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Valid email is required';
+    if (!password || password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep2 = () => {
+    const newErrors: Record<string, string> = {};
+    if (!course || !course.trim()) newErrors.course = 'Course of study is required';
+    setErrors(newErrors);
+    if (duration === null) {
+      newErrors.duration = 'Duration is required';
+    }
+    if (currentYr === null) {
+      newErrors.currentYr = 'Current year is required';
+    }
+    if (currentTerm === null) {
+      newErrors.currentTerm = 'Current term is required';
+    }
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleStepChange = (targetIndex: number) => {
+    if (targetIndex > activeStep) {
+      if (activeStep === 0 && !validateStep1()) return;
+      if (activeStep === 1 && !validateStep2()) return;
+    }
+    setActiveStep(targetIndex);
+  };
+
   //Conditional Step Rendering
   const renderContent = () => {
-    switch(activeStep)
-    {
-      case 0:
-        return  (
-        <View style={[{display:'flex',flexDirection:'column',width:'100%'}]}>       
+    if (activeStep === 0) {
+      return (
+        <View style={[{ width: '100%'}]}>
           {/* Names */}
-        <View style={[{display:'flex',flexDirection:'row',gap:'12',width:'100%',marginBottom:12}]}>
-            <View style={{flex:1}}>
-            <Text style={[logincardstyles.label,Typography.presets.subtitle]}>First Name</Text>
-            <TextInput
-                style={[logincardstyles.input,{width:'100%'},Typography.presets.subtitle]}
-                // value={fname}
-                // onChangeText={setFname}
+          <View style={[{ display: 'flex', flexDirection: 'row', gap: 12, width: '100%', marginBottom: 12 }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={[logincardstyles.label, Typography.presets.subtitle]}>First Name</Text>
+              <TextInput
+                key="fname"
+                style={[logincardstyles.input, { width: '100%' }, Typography.presets.subtitle]}
+                onChangeText={setFname}
                 placeholder="John"
                 placeholderTextColor={"#b1b1b1"}
                 keyboardType="default"
                 autoCapitalize='words'
-            />
+              />
+              {errors.fname && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.fname}</Text>}
             </View>
-
-            <View style={{flex:1}}>
-            <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Last Name</Text>
-            <TextInput
-                style={[logincardstyles.input,{width:'100%'},Typography.presets.subtitle]}
-                // value={lname}
-                // onChangeText={setLname}
+            <View style={{ flex: 1 }}>
+              <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Last Name</Text>
+              <TextInput
+                key="lname"
+                style={[logincardstyles.input, { width: '100%' }, Typography.presets.subtitle]}
+                onChangeText={setLname}
                 placeholder="Doe"
                 placeholderTextColor={"#b1b1b1"}
                 keyboardType="default"
                 autoCapitalize='words'
-            />
+              />
+              {errors.lname && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.lname}</Text>}
             </View>
-        </View>
-        {/* Email Address */}
-        <View style={logincardstyles.inputGroup}>
-          <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Email Address</Text>
-          <TextInput
-            style={[logincardstyles.input,Typography.presets.subtitle,{width:'100%'}]}
-            // value={email}
-            // onChangeText={setEmail}
-            placeholder="you@gmail.com"
-            placeholderTextColor={"#b1b1b1"}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
-        {/* Password */}
-        <View style={logincardstyles.inputGroup}>
-          <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Password</Text>
-          <TextInput
-            style={[logincardstyles.input,Typography.presets.subtitle]}
-            // value={password}
-            // onChangeText={setPassword}
-            placeholder='Minimum of 8 characters'
-            secureTextEntry  
-            placeholderTextColor={'#b1b1b1'}          
-          />
-        </View>
-        {/* next button */}
-        <TouchableOpacity 
-          style={[logincardstyles.button,{marginTop:12,marginBottom:0,flex:1}]}
-          onPress={() => nextStep()}
-        >
-          <Text style={[Typography.presets.Slogan,logincardstyles.buttonText]}>Next</Text>
-        </TouchableOpacity> 
-        </View>);
-      case 1:  
-    }
-  }
-
-  return (
-    <View style={logincardstyles.card}>
-        {/* Header */}
-        <Text style={[logincardstyles.title,Typography.presets.Slogan,{marginBottom:12}]}>Sign up</Text>
-        {/* Log in link */}
-        <View style={[{display:'flex',flexDirection:'row',width:'100%',justifyContent:'center',marginBottom:12}]}>
-            <Text style={logincardstyles.footerText}>Already have an account? </Text>
-            <TouchableOpacity>
-            <Text style={[logincardstyles.footerText, logincardstyles.signUpLink]}>Log in</Text>
-            </TouchableOpacity>
-        </View>
-        {/* Step Indicator */}
-        <View>
-            <StepIndicator 
-             steps={STEPS} 
-             activeStep={activeStep} 
-             onStepChange={(index)=> setActiveStep(index)} 
-             />
-        </View>
-
-      {/* STEP 2 */}
-      <View style={[{display:'flex',flexDirection:'column',width:'100%'}]}>       
-          {/* Course */}
-        <View style={[{display:'flex',flexDirection:'row',gap:'12',width:'100%',marginBottom:12}]}>
-            <View style={{flex:1}}>
-            <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Course of Study</Text>
+          </View>
+          {/* Email Address */}
+          <View style={{ display: 'flex', flexDirection: 'column'}}>
+          <View style={[logincardstyles.inputGroup]}>
+            <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Email Address</Text>
             <TextInput
-                style={[logincardstyles.input,{width:'100%'},Typography.presets.subtitle]}
-                // value={course}
-                // onChangeText={setCourse}
-                placeholder="Computer Science"
+              key="email"
+              style={[logincardstyles.input, Typography.presets.subtitle, { width: '100%' }]}
+              onChangeText={setEmail}
+              placeholder="you@gmail.com"
+              placeholderTextColor={"#b1b1b1"}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {errors.email && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.email}</Text>}
+          </View>  
+          </View>
+          
+          {/* Password */}
+          <View style={{ display: 'flex', flexDirection: 'column'}}>
+          <View style={logincardstyles.inputGroup}>
+            <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Password</Text>
+            <TextInput
+              key="password"
+              style={[logincardstyles.input, Typography.presets.subtitle]}
+              onChangeText={setPassword}
+              placeholder='Minimum of 8 characters'
+              secureTextEntry
+              placeholderTextColor={'#b1b1b1'}
+            />
+            {errors.password && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.password}</Text>}
+          </View>  
+          </View>
+          
+        </View>
+      );
+    } else if (activeStep === 1) {
+      return (
+        <View style={[{ display: 'flex', flexDirection: 'column', width: '100%' }]}>
+          {/* Course */}
+          <View style={[{ display: 'flex', flexDirection: 'row', gap: 12, width: '100%', marginBottom: 12 }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Course of Study</Text>
+              <TextInput
+                key="course"
+                style={[logincardstyles.input, { width: '100%' }, Typography.presets.subtitle]}
+                onChangeText={setCourse}
+                placeholder="Computer Scien..."
                 placeholderTextColor={"#b1b1b1"}
                 keyboardType="default"
                 autoCapitalize='words'
-            />
+              />
+              {errors.course && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.course}</Text>}
             </View>
 
-            <View style={{flex:1}}>
-            <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Duration in Years</Text>
-            <NumberSelectorComponent 
-              maxNumber={10} 
-              onNumberSelected={(num) => setSelectedCount(num)} 
-            />
+            <View style={{ flex: 1 }}>
+              <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Duration in Years</Text>
+              <NumberSelectorComponent
+                maxNumber={selectedCount}
+                onNumberSelected={(num) => {setDuration(num);setSelectedCount(num);}}
+              />
+              {errors.duration && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.duration}</Text>}
             </View>
-        </View>
+          </View>
 
-      {/* Academic System selector */}
-        <View style={logincardstyles.inputGroup}>
-          <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Academic System?</Text>
-          <GenericPillSelector
-            selectedValue={academicSystem} // Correct prop name
-            onSelectionChange={(val) => handleSystemChange(val as System)}
-            options={[
-              { label: 'Semester', value: 'Semester' },
-              { label: 'Trimester', value: 'Trimester' },
-            ]}
-          />
+          {/* Academic System selector */}
+          <View style={{ display: 'flex', flexDirection: 'column'}}>
+          <View style={logincardstyles.inputGroup}>
+            <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Academic System?</Text>
+            <GenericPillSelector
+              selectedValue={academicSystem} // Correct prop name
+              onSelectionChange={(val) => handleSystemChange(val as System)}
+              options={[
+                { label: 'Semester', value: 'Semester' },
+                { label: 'Trimester', value: 'Trimester' },
+              ]}
+            />
+          </View>  
+          </View>
           
-        </View>
 
-      {/* Year and Sem */}
-        <View style={[{display:'flex',flexDirection:'row',gap:'12',width:'100%',marginBottom:12}]}>
-            <View style={{flex:1}}>
-            <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Current Yr of Study</Text>
-            <NumberSelectorComponent 
-              maxNumber={selectedCount} 
-              onNumberSelected={(num) => setCurrentYr(num)} 
-            />
+          {/* Year and Sem */}
+          <View style={[{ display: 'flex', flexDirection: 'row', gap: 12, width: '100%', marginBottom: 12 }]}>
+            <View style={{width: '50%'}}>
+              <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Current Yr of Study</Text>
+              <NumberSelectorComponent
+                maxNumber={selectedCount}
+                onNumberSelected={(num) => setCurrentYr(num)}
+              />
+              {errors.currentYr && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.currentYr}</Text>}
             </View>
 
-            <View style={{flex:1}}>
-            <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Current {academicSystem}</Text>
-            <NumberSelectorComponent 
-              maxNumber={termLimit} 
-              onNumberSelected={(num) => setCurrentTerm(num)} 
-            />
+            <View style={{width: '50%'}}>
+              <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Current {academicSystem}</Text>
+              <NumberSelectorComponent
+                maxNumber={termLimit}
+                onNumberSelected={(num) => setCurrentTerm(num)}
+              />
+              {errors.currentTerm && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.currentTerm}</Text>}
             </View>
+          </View>
         </View>
+      );
+    }
+    return null;
+  };
 
-        {/* Phone Number */}
-        <View style={logincardstyles.inputGroup}>
-          <Text style={[logincardstyles.label,Typography.presets.subtitle]}>Phone Number</Text>
-          <TextInput
-            style={[logincardstyles.input,Typography.presets.subtitle]}
-            // value={password}
-            // onChangeText={setPassword}
-            placeholder='+254 769 355 433'
-            keyboardType='numeric' 
-            placeholderTextColor={'#b1b1b1'}          
-          />
-        </View>
-
-
-
+  return (
+    <View style={logincardstyles.card}>
+      {/* Header */}
+      <Text style={[logincardstyles.title, Typography.presets.Slogan, { marginBottom: 12 }]}>Sign up</Text>
+      {/* Log in link */}
+      <View style={[{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'center', marginBottom: 12 }]}>
+        <Text style={logincardstyles.footerText}>Already have an account? </Text>
+        <TouchableOpacity>
+          <Text style={[logincardstyles.footerText, logincardstyles.signUpLink]}>Log in</Text>
+        </TouchableOpacity>
       </View>
-
+      {/* Step Indicator */}
       <View>
-        {activeStep === 0}
+        <StepIndicator
+          steps={STEPS}
+          activeStep={activeStep}
+          onStepChange={handleStepChange}
+        />
       </View>
-      <View style={[{display:'flex',flexDirection:'row',gap:'12',width:'100%',marginBottom:12}]}>
-        <TouchableOpacity 
-          style={[logincardstyles.altbutton,{marginTop:12,marginBottom:0,flex:1}]}
-          onPress={() => prevStep()}
-        >
-        <Text 
-          style={[Typography.presets.Slogan,logincardstyles.buttonText,{color:'#000'}]}
-          >Back</Text>
-          </TouchableOpacity> 
-        <TouchableOpacity 
-            style={[logincardstyles.button,{marginTop:12,marginBottom:0,flex:1}]}
-            onPress={() => nextStep()}
+
+      {/* Dynamic Form Content */}
+      <View style={{ marginTop: 12, display: 'flex', flexDirection: 'column', flex: 1   }}>
+        {renderContent()}
+      </View>
+
+      {/* Navigation Buttons */}
+      <View style={[{ display: 'flex', flexDirection: 'row', gap: 12, width: '100%', marginBottom: 12, marginTop: 12 }]}>
+        {activeStep > 0 && (
+          <TouchableOpacity
+            style={[logincardstyles.altbutton, { marginTop: 12, marginBottom: 0, flex: 1 }]}
+            onPress={() => prevStep()}
           >
-          <Text 
-            style={[Typography.presets.Slogan,logincardstyles.buttonText]}
-            >Next</Text>
-        </TouchableOpacity>   
-        </View>      
+            <Text style={[Typography.presets.Slogan, logincardstyles.buttonText, { color: '#000' }]}>Back</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          style={[logincardstyles.button, { marginTop: 12, marginBottom: 0, flex: 1 }]}
+          onPress={() => {
+            if (activeStep === 0 && !validateStep1()) return;
+            if (activeStep === 1 && !validateStep2()) return;
+
+            if (activeStep < STEPS.length - 1) {
+              nextStep();
+            } else {
+              // Final Submit action
+              console.log('Form Submitted');
+            }
+          }}
+        >
+          <Text style={[Typography.presets.Slogan, logincardstyles.buttonText]}>
+            {activeStep === STEPS.length - 1 ? 'Submit' : 'Next'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
-
-    //     <View style={styles.card}>
-    //         <StepIndicator 
-    //         steps={STEPS} 
-    //         activeStep={activeStep} 
-    //         onStepChange={setActiveStep} 
-    //         />
-    //     </View>
-
-    //     <View style={styles.navContainer}>
-    //         <TouchableOpacity 
-    //         style={[styles.btn, activeStep === 0 && styles.disabled]}
-    //         onPress={() => setActiveStep(prev => Math.max(0, prev - 1))}
-    //         disabled={activeStep === 0}
-    //         >
-    //         <Text style={styles.btnTextBack}>← Back</Text>
-    //         </TouchableOpacity>
-
-    //         <TouchableOpacity 
-    //         style={[styles.btn, styles.btnPrimary, activeStep === STEPS.length - 1 && styles.disabled]}
-    //         onPress={() => setActiveStep(prev => Math.min(STEPS.length - 1, prev + 1))}
-    //         disabled={activeStep === STEPS.length - 1}
-    //         >
-    //         <Text style={styles.btnTextNext}>Next →</Text>
-    //         </TouchableOpacity>
-    //     </View>
-    // </View>
   );
 }
 
