@@ -1,15 +1,12 @@
 // src/app/index.tsx
 
-import { SafeAreaProvider } from "react-native-safe-area-context";
-
-import LoadingScreen from "@/src/screens/Loader";
+import { View, Text } from "react-native";
+import { Typography } from "@/src/styles";
+import Dashboard from "@/src/screens/Dashboard";
 
 export default function Index() {
 
-
   return (
-    <SafeAreaProvider>
-      <LoadingScreen/>
-    </SafeAreaProvider>    
+    <Dashboard />
   );
 }

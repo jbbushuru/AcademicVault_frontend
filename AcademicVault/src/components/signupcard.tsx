@@ -1,20 +1,26 @@
 // src/components/signupcard.tsx
 
-import { GraduationCap, User } from 'lucide-react-native';
+import { GraduationCap, User, Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { Typography, uselogincardstyles } from '../styles';
 import NumberSelectorComponent from './ui/numberDropdown';
 import GenericPillSelector, { System } from './ui/pillSelector';
 import { StepIndicator, StepItem } from './ui/stepIndicator';
 
+const BASE_URL = 'http://192.168.1.130:5000';
 
 const STEPS: StepItem[] = [
   { icon: User, Title: "Account", desc: "Basic Information" },
   { icon: GraduationCap, Title: "Academics", desc: "Your Academic Details" },
 ];
 
-export default function SignUpCard() {
+interface SignUpCardProps {
+  onSwitchToLogin?: () => void;
+  onSignupSuccess?: (data: any) => void;
+}
+
+export default function SignUpCard({ onSwitchToLogin, onSignupSuccess }: SignUpCardProps) {
   //Styling Hook
   const logincardstyles = uselogincardstyles();
   if (!logincardstyles) return null;
@@ -25,6 +31,7 @@ export default function SignUpCard() {
   const [lname, setLname] = useState<string | null>(null); //last name
   const [email, setEmail] = useState<string | null>(null); //email address
   const [password, setPassword] = useState<string | null>(null); //password
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [course, setCourse] = useState<string | null>(null); //course of study
   const [academicSystem, setAcademicSystem] = useState('Semester'); // academic system
   const [termLimit, setTermLimit] = useState<number>(2);
@@ -33,6 +40,9 @@ export default function SignUpCard() {
   const [currentYr, setCurrentYr] = useState<number|null>(null); //current year
   const [currentTerm, setCurrentTerm] = useState<number|null>(null); //current term
   const [phoneNum, setPhoneNum] = useState<string | null>(null); //phone number
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Navigation Hooks
   const [activeStep, setActiveStep] = useState(0);
@@ -82,6 +92,51 @@ export default function SignUpCard() {
       if (activeStep === 1 && !validateStep2()) return;
     }
     setActiveStep(targetIndex);
+  };
+
+  const handleSignup = async () => {
+    if (!validateStep1() || !validateStep2()) return;
+    
+    setIsLoading(true);
+    setSubmitError(null);
+    
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: fname?.trim(),
+          lastName: lname?.trim(),
+          email: email?.trim(),
+          password,
+          course: course?.trim(),
+          courseDuration: duration,
+          academicSystem,
+          yrOfStudy: currentYr,
+          currentTerm,
+          phoneNo: phoneNum?.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setSubmitError(data.error || data.message || 'Signup failed.');
+        return;
+      }
+
+      // Success - auto login using the token
+      if (onSignupSuccess) {
+        onSignupSuccess(data);
+      } else if (onSwitchToLogin) {
+        onSwitchToLogin();
+      }
+    } catch (err) {
+      console.error(err);
+      setSubmitError('Network error. Unable to connect.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   //Conditional Step Rendering
@@ -139,14 +194,22 @@ export default function SignUpCard() {
           <View style={{ display: 'flex', flexDirection: 'column'}}>
           <View style={logincardstyles.inputGroup}>
             <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Password</Text>
-            <TextInput
-              key="password"
-              style={[logincardstyles.input, Typography.presets.subtitle]}
-              onChangeText={setPassword}
-              placeholder='Minimum of 8 characters'
-              secureTextEntry
-              placeholderTextColor={'#b1b1b1'}
-            />
+            <View style={{ position: 'relative', width: '100%' }}>
+              <TextInput
+                key="password"
+                style={[logincardstyles.input, Typography.presets.subtitle, { paddingRight: 40 }]}
+                onChangeText={setPassword}
+                placeholder='Minimum of 8 characters'
+                secureTextEntry={!showPassword}
+                placeholderTextColor={'#b1b1b1'}
+              />
+              <TouchableOpacity 
+                style={{ position: 'absolute', right: 15, top: 0, bottom: 0, justifyContent: 'center' }} 
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={20} color="#b1b1b1" /> : <Eye size={20} color="#b1b1b1" />}
+              </TouchableOpacity>
+            </View>
             {errors.password && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.password}</Text>}
           </View>  
           </View>
@@ -231,7 +294,7 @@ export default function SignUpCard() {
       {/* Log in link */}
       <View style={[{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'center', marginBottom: 12 }]}>
         <Text style={logincardstyles.footerText}>Already have an account? </Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onSwitchToLogin}>
           <Text style={[logincardstyles.footerText, logincardstyles.signUpLink]}>Log in</Text>
         </TouchableOpacity>
       </View>
@@ -243,6 +306,10 @@ export default function SignUpCard() {
           onStepChange={handleStepChange}
         />
       </View>
+
+      {submitError ? (
+        <Text style={{ color: '#ef4444', textAlign: 'center', marginTop: 12 }}>{submitError}</Text>
+      ) : null}
 
       {/* Dynamic Form Content */}
       <View style={{ marginTop: 12, display: 'flex', flexDirection: 'column', flex: 1   }}>
@@ -260,22 +327,27 @@ export default function SignUpCard() {
           </TouchableOpacity>
         )}
         <TouchableOpacity
-          style={[logincardstyles.button, { marginTop: 12, marginBottom: 0, flex: 1 }]}
+          style={[logincardstyles.button, { marginTop: 12, marginBottom: 0, flex: 1 }, isLoading && { opacity: 0.7 }]}
+          disabled={isLoading}
           onPress={() => {
+            setSubmitError(null);
             if (activeStep === 0 && !validateStep1()) return;
             if (activeStep === 1 && !validateStep2()) return;
 
             if (activeStep < STEPS.length - 1) {
               nextStep();
             } else {
-              // Final Submit action
-              console.log('Form Submitted');
+              handleSignup();
             }
           }}
         >
-          <Text style={[Typography.presets.Slogan, logincardstyles.buttonText]}>
-            {activeStep === STEPS.length - 1 ? 'Submit' : 'Next'}
-          </Text>
+          {isLoading && activeStep === STEPS.length - 1 ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={[Typography.presets.Slogan, logincardstyles.buttonText]}>
+              {activeStep === STEPS.length - 1 ? 'Submit' : 'Next'}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

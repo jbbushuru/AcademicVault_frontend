@@ -28,7 +28,11 @@ export const Typography = {
     Slogan: {
       fontFamily: 'LoveYa',
       fontSize:28,
-    },    
+    },  
+    Title: {
+      fontFamily: 'LoveYa',
+      fontSize:18,
+    },  
     subtitle: {
       fontFamily: 'Indie',
       fontSize: 14,

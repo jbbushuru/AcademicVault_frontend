@@ -4,9 +4,16 @@ import LoginCard from "../components/logincard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useappstyles from "../styles";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { useAuth } from "../context/AuthContext";
 
-export default function Login(){
+interface LoginProps {
+    onSwitchToSignup?: () => void;
+}
+
+export default function Login({ onSwitchToSignup }: LoginProps){
     const styles = useappstyles();
+    const { login } = useAuth();
+
     return(
         <SafeAreaView style={styles.authcontainer}>
             <KeyboardAvoidingView
@@ -17,9 +24,11 @@ export default function Login(){
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             >
-            <LoginCard/>    
+            <LoginCard 
+              onSwitchToSignup={onSwitchToSignup} 
+              onLoginSuccess={(data) => login(data.token, data.profile)} 
+            />    
             </ScrollView>
-                
             </KeyboardAvoidingView>           
         </SafeAreaView>
     );

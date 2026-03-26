@@ -3,11 +3,12 @@
 import { Button } from "@react-navigation/elements";
 
 
-const tintColorLight = '#0a7ea4';
+const tintColorLight = '#d20d0dff';
 const tintColorDark = '#fff';
 
 export interface ThemeColors{
   primary:string;
+  secondary:string;
   bannerText:string;
   text:string;
   subtext:string;
@@ -28,6 +29,7 @@ export interface ThemeColors{
 export const Colors = {
   light: {
     primary:'#9B7B95',
+    secondary:'#604C5F',
     bannerText:'#C6005C',
     text: '#000000',
     subtext:'#45556C',
@@ -38,12 +40,13 @@ export const Colors = {
     inputfocused:'#7b5e77',
     button:'#7B5E77',
     altbutton:{bg:'#7B5E7750',stroke:'#7B5E77'},
-    tint: tintColorLight,
+    tint: '#eeede4',
     tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    tabIconSelected: "#604C5F",
   },
   dark: {
-    primary:'#9B7B95',  
+    primary:'#9B7B95',
+    secondary:'#604C5F',  
     bannerText:'#C6005C',  
     text: '#ECEDEE',
     subtext:'#45556C',    
