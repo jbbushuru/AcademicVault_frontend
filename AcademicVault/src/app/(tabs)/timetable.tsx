@@ -1,12 +1,9 @@
- //src/app/tabs/timetable.tsx
+// /src/app/tabs/timetable.tsx
 
-import { View,Text } from "react-native";
-import { Typography } from "@/src/styles";
+import Timetable from "@/src/screens/Timetable";
 
- export default function Timetable(){
-    return (
-        <View style={{flex:1,justifyContent:"center",alignItems:"center"}}>
-            <Text style={Typography.presets.Slogan}>Timetable</Text>
-        </View>
-    );
- }
+export default function TimetableRoute() {
+  return (
+    <Timetable />
+  );
+}

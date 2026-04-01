@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { Typography } from '@/src/styles';
 
-// 1. Export the type so the card can use it
 export type System = 'Semester' | 'Trimester';
+export type TTView = 'Daily'| 'Weekly';
 
 interface PillOption<T> {
   label: string;

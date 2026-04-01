@@ -7,8 +7,9 @@ import { Typography, uselogincardstyles } from '../styles';
 import NumberSelectorComponent from './ui/numberDropdown';
 import GenericPillSelector, { System } from './ui/pillSelector';
 import { StepIndicator, StepItem } from './ui/stepIndicator';
+import BASE_url from '../constants/baseURL';
 
-const BASE_URL = 'http://192.168.1.130:5000';
+const BASE_URL = BASE_url;
 
 const STEPS: StepItem[] = [
   { icon: User, Title: "Account", desc: "Basic Information" },
@@ -34,13 +35,10 @@ export default function SignUpCard({ onSwitchToLogin, onSignupSuccess }: SignUpC
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [course, setCourse] = useState<string | null>(null); //course of study
   const [academicSystem, setAcademicSystem] = useState('Semester'); // academic system
-  const [termLimit, setTermLimit] = useState<number>(2);
-  const [selectedCount, setSelectedCount] = useState<number>(10);  // duration
+  const [termLimit, setTermLimit] = useState<number>(2);  
   const [duration, setDuration] = useState<number|null>(null);
   const [currentYr, setCurrentYr] = useState<number|null>(null); //current year
   const [currentTerm, setCurrentTerm] = useState<number|null>(null); //current term
-  const [phoneNum, setPhoneNum] = useState<string | null>(null); //phone number
-
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -112,9 +110,8 @@ export default function SignUpCard({ onSwitchToLogin, onSignupSuccess }: SignUpC
           course: course?.trim(),
           courseDuration: duration,
           academicSystem,
-          yrOfStudy: currentYr,
-          currentTerm,
-          phoneNo: phoneNum?.trim(),
+          year: currentYr,
+          term: currentTerm,
         }),
       });
 
@@ -189,7 +186,6 @@ export default function SignUpCard({ onSwitchToLogin, onSignupSuccess }: SignUpC
             {errors.email && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.email}</Text>}
           </View>  
           </View>
-          
           {/* Password */}
           <View style={{ display: 'flex', flexDirection: 'column'}}>
           <View style={logincardstyles.inputGroup}>
@@ -238,19 +234,18 @@ export default function SignUpCard({ onSwitchToLogin, onSignupSuccess }: SignUpC
             <View style={{ flex: 1 }}>
               <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Duration in Years</Text>
               <NumberSelectorComponent
-                maxNumber={selectedCount}
-                onNumberSelected={(num) => {setDuration(num);setSelectedCount(num);}}
+                maxNumber={10}
+                onNumberSelected={(num) => {setDuration(num);}}
               />
               {errors.duration && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.duration}</Text>}
             </View>
           </View>
-
           {/* Academic System selector */}
           <View style={{ display: 'flex', flexDirection: 'column'}}>
           <View style={logincardstyles.inputGroup}>
             <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Academic System?</Text>
             <GenericPillSelector
-              selectedValue={academicSystem} // Correct prop name
+              selectedValue={academicSystem}
               onSelectionChange={(val) => handleSystemChange(val as System)}
               options={[
                 { label: 'Semester', value: 'Semester' },
@@ -259,14 +254,12 @@ export default function SignUpCard({ onSwitchToLogin, onSignupSuccess }: SignUpC
             />
           </View>  
           </View>
-          
-
           {/* Year and Sem */}
           <View style={[{ display: 'flex', flexDirection: 'row', gap: 12, width: '100%', marginBottom: 12 }]}>
             <View style={{width: '50%'}}>
               <Text style={[logincardstyles.label, Typography.presets.subtitle]}>Current Yr of Study</Text>
               <NumberSelectorComponent
-                maxNumber={selectedCount}
+                maxNumber={duration || 4}
                 onNumberSelected={(num) => setCurrentYr(num)}
               />
               {errors.currentYr && <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.currentYr}</Text>}

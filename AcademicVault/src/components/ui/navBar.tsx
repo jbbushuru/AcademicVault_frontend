@@ -10,10 +10,12 @@ const NavBar = () => {
     const { logout, userProfile } = useAuth();
     const { currentContext, setCurrentContext } = useAcademic();
     const router = useRouter();
-    const colors = theme();
 
+    const userName = userProfile?.firstName + " " + userProfile?.lastName || "User";
+    const userCourse = userProfile?.course || "Course";
     const userYear = userProfile?.year || 1;
-    const userSemester = userProfile?.semester || 1;
+    const userTerm = userProfile?.term || 1;
+    const academicLabel = userProfile?.academicSystem?.toUpperCase() || "TERM";
     const courseDuration = userProfile?.courseDuration || 4;
 
     const menuItems = [
@@ -25,7 +27,7 @@ const NavBar = () => {
     ];
 
     const handleAccountManagement = () => {
-        // router.push("/account"); // Screen to be created later as per user request
+        router.push("/account" as any); 
     };
 
     return (
@@ -38,9 +40,9 @@ const NavBar = () => {
                     </View>
                 </View>
                 <View style={styles.userInfo}>
-                    <Text style={styles.userName}>{userProfile?.name || "STUDENT ONE"}</Text>
-                    <Text style={styles.userCourse}>{userProfile?.course || "SOFTWARE ENGINEERING"}</Text>
-                    <Text style={styles.userDetails}>YEAR {userYear} | SEMESTER {userSemester}</Text>
+                    <Text style={styles.userName}>{userName}</Text>
+                    <Text style={styles.userCourse}>{userCourse}</Text>
+                    <Text style={styles.userDetails}>YEAR {userYear} | {academicLabel} {userTerm}</Text>
                 </View>
             </View>
 

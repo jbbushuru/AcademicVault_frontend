@@ -12,6 +12,7 @@ export default function TabsLayout() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const iconSize = 24;
     const colors = theme();
+    if (!colors) return null;
 
     return (
         <View style={{ flex: 1 }}>
@@ -24,7 +25,6 @@ export default function TabsLayout() {
                         borderTopWidth: 0,
                     },
                     headerShown: true,
-                    headerTitle: "ACADEMIC VAULT",
                     headerTitleStyle: {
                         fontFamily: "LoveYa",
                         fontSize: 24,
@@ -38,7 +38,7 @@ export default function TabsLayout() {
                     headerRight: () => (
                         <View style={{ marginRight: 20 }}>
                             <TouchableOpacity 
-                            // onPress={() => setIsMenuOpen(true)}
+                             onPress={() => setIsMenuOpen(true)}
                             >
                                 <Menu size={24} color={colors.primary} />
                             </TouchableOpacity>
@@ -72,7 +72,7 @@ export default function TabsLayout() {
                 }} />
             </Tabs>
 
-            {/* <Modal
+            <Modal
                 animationType="slide"
                 transparent={true}
                 visible={isMenuOpen}
@@ -81,14 +81,14 @@ export default function TabsLayout() {
                 <TouchableWithoutFeedback onPress={() => setIsMenuOpen(false)}>
                     <View style={styles.modalOverlay}>
                         <TouchableWithoutFeedback>
-                            <View style={styles.modalContent}>
+                            <View style={[styles.modalContent, { backgroundColor: colors.background || '#FFFEF5' }]}>
                                 <View style={styles.handle} />
                                 <NavBar />
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
                 </TouchableWithoutFeedback>
-            </Modal> */}
+            </Modal>
         </View>
     );
 }
@@ -100,8 +100,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContent: {
-        height: '72%',
-        backgroundColor: '#FFFEF5',
+        height: '75%',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         paddingBottom: 20,

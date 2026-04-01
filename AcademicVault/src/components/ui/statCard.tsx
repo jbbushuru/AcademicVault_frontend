@@ -16,7 +16,6 @@ interface StatCardProps {
 
 
 const StatCard = ({ title, icon: Icon, value, subtitle, iconColor = '#4A90D9' }: StatCardProps) => {
-    const {colors} = useTheme();
     return (
         <View style={styles.card}>
             <View style={styles.topRow}>
@@ -47,15 +46,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 6,
+        marginBottom: 3,
     },
     title: {
-        fontSize: 16,
+        fontSize: 12,
         color: '#374151',
     },
     value: {
         fontFamily: 'LoveYa',
-        fontSize: 36,
+        fontSize: 32,
         color: '#1f2937',
         marginLeft:10,
     },

@@ -11,9 +11,10 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { uselogincardstyles } from '../styles';
+import BASE_url from '../constants/baseURL';
 
 // Use the appropriate base URL for the backend API depending on the platform
-const BASE_URL = 'http://192.168.1.130:5000';
+const BASE_URL = BASE_url;
 
 interface LoginCardProps {
   onSwitchToSignup?: () => void;

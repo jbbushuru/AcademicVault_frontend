@@ -13,13 +13,13 @@ const CurrentStats = () => {
     const colors = theme();
 
     const currentYear = userProfile?.year || 1;
-    const currentTerm = userProfile?.semester || 1;
+    const currentTerm = userProfile?.term || 1;
     const courseDuration = userProfile?.courseDuration || 4;
     // 'semester' or 'trimester'
     const academicSystem: string = userProfile?.academicSystem || 'semester';
     const termsPerYear = academicSystem === 'trimester' ? 3 : 2;
 
-    const termLabel = academicSystem === 'trimester' ? 'Trim' : 'Sem';
+    const termLabel = 'Term';
 
     // Determine what to display based on context
     const isOverall = currentContext === 'Overall';
@@ -64,12 +64,15 @@ const CurrentStats = () => {
                 ? `${termLabel} ${currentTerm}`
                 : `${termLabel} 1`; // future year
 
+    // If it's overall OR it's the year the user is currently in
+    const showsCurrent = isOverall || (contextYear === currentYear);
+
     return (
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.headerRow}>
                 <Swords size={22} color={colors.secondary} style={styles.headerIcon} />
-                <Text style={styles.headerText}>Your Current Stats</Text>
+                <Text style={styles.headerText}>{showsCurrent ? "Your Current Stats" : "Your Stats"}</Text>
             </View>
 
             {/* Level + Sublevel Cards */}
@@ -84,21 +87,23 @@ const CurrentStats = () => {
                 </View>
 
                 {/* Sublevel Card */}
-                <View style={[styles.card, styles.sublevelCard]}>
-                    <View style={styles.cardLabelRow}>
-                        <BookOpen size={16} color="#6B8E7B" />
-                        <Text style={[styles.cardLabel, { color: '#6B8E7B' }]}>Sublevel</Text>
+                {showsCurrent && (
+                    <View style={[styles.card, styles.sublevelCard]}>
+                        <View style={styles.cardLabelRow}>
+                            <BookOpen size={16} color="#6B8E7B" />
+                            <Text style={[styles.cardLabel, { color: '#6B8E7B' }]}>Sublevel</Text>
+                        </View>
+                        <Text style={[styles.cardValue, { color: '#6B8E7B' }]}>{displayTerm}</Text>
                     </View>
-                    <Text style={[styles.cardValue, { color: '#6B8E7B' }]}>{displayTerm}</Text>
-                </View>
+                )}
             </View>
 
             {/* Scholar XP */}
-            <View style={styles.xpSection}>
+            <View>
                 <View style={styles.xpLabelRow}>
                     <View style={styles.xpLabelLeft}>
                         <Sparkles size={14} color={colors.primary} />
-                        <Text style={styles.xpLabel}>Scholar Chapters {`(${currentContext})`}</Text>
+                        <Text style={styles.xpLabel}>Scholar Chapters</Text>
                     </View>
                     <Text style={styles.xpFraction}>
                         <Text style={styles.xpCurrent}>{termsCovered}</Text>
@@ -120,7 +125,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 20,
         padding: 20,
-        marginVertical: 10,
         elevation: 3,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -132,25 +136,25 @@ const styles = StyleSheet.create({
     headerRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 18,
+        marginBottom: 12,
     },
     headerIcon: {
         marginRight: 8,
     },
     headerText: {
         fontFamily: 'LoveYa',
-        fontSize: 22,
+        fontSize: 18,
         color: '#374151',
     },
     cardsRow: {
         flexDirection: 'row',
         gap: 12,
-        marginBottom: 20,
+        marginBottom:16,
     },
     card: {
         flex: 1,
         borderRadius: 16,
-        padding: 14,
+        padding: 12,
         borderWidth: 1.5,
     },
     levelCard: {
@@ -176,16 +180,12 @@ const styles = StyleSheet.create({
         fontFamily: 'LoveYa',
         fontSize: 32,
         color: '#604C5F',
-        marginTop: 2,
-    },
-    xpSection: {
-        marginTop: 4,
     },
     xpLabelRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 6,
     },
     xpLabelLeft: {
         flexDirection: 'row',
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
         color: '#374151',
     },
     progressBarBg: {
-        height: 22,
+        height: 20,
         borderRadius: 12,
         backgroundColor: '#f0ede6',
         overflow: 'hidden',
