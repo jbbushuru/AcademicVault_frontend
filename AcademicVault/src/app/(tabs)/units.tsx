@@ -1,12 +1,9 @@
 //src/app/tabs/units.tsx
 
-import { View,Text } from "react-native";
-import { Typography } from "@/src/styles";
+import Units from "@/src/screens/units/Units";
 
-export default function Units(){
+export default function UnitsPage(){
     return (
-        <View style={{flex:1,justifyContent:"center",alignItems:"center"}}>
-            <Text style={Typography.presets.Slogan}>Units</Text>
-        </View>
+        <Units/>
     );
 }

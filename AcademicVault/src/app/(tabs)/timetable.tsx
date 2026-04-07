@@ -1,12 +1,22 @@
- //src/app/tabs/timetable.tsx
+import React from "react";
+import Timetable from "@/src/screens/timetable/Timetable";
+import TTOnboarding from "@/src/components/TTonboarding";
+import { useTimetable } from "@/src/context/TimetableContext";
 
-import { View,Text } from "react-native";
-import { Typography } from "@/src/styles";
+export default function TimetableRoute() {
+    const { settings, updateSettings } = useTimetable();
 
- export default function Timetable(){
+    if (!settings.hasOnboarded) {
+        return (
+            <TTOnboarding
+                onComplete={(newSettings) => {
+                    updateSettings({ ...newSettings, hasOnboarded: true });
+                }}
+            />
+        );
+    }
+
     return (
-        <View style={{flex:1,justifyContent:"center",alignItems:"center"}}>
-            <Text style={Typography.presets.Slogan}>Timetable</Text>
-        </View>
+        <Timetable />
     );
- }
+}

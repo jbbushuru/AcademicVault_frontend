@@ -8,7 +8,7 @@ import {
   ActivityIndicator, 
   Animated
 } from 'react-native';
-import { loaderstyles,Typography } from '../styles';
+import { loaderstyles,Typography } from '@/src/styles';
 
 
 const LoadingScreen = () => {

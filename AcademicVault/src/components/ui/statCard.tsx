@@ -4,7 +4,6 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { LucideIcon } from "lucide-react-native";
 import { Typography } from "@/src/styles";
-import { useTheme } from "@/src/context/ThemeContext";
 
 interface StatCardProps {
     title: string;
@@ -16,12 +15,11 @@ interface StatCardProps {
 
 
 const StatCard = ({ title, icon: Icon, value, subtitle, iconColor = '#4A90D9' }: StatCardProps) => {
-    const {colors} = useTheme();
     return (
         <View style={styles.card}>
             <View style={styles.topRow}>
                 <Text style={[Typography.presets.Title,styles.title]}>{title}</Text>
-                <Icon size={22} color={iconColor} />
+                <Icon size={22} color={iconColor} />    
             </View>
             <Text style={styles.value}>{value}</Text>
             <Text style={styles.subtitle}>{subtitle}</Text>
@@ -32,10 +30,12 @@ const StatCard = ({ title, icon: Icon, value, subtitle, iconColor = '#4A90D9' }:
 const styles = StyleSheet.create({
     card: {
         flex: 1,
+        flexDirection:"column",
+        gap:6,
         backgroundColor: '#fff',
         borderRadius: 16,
         padding: 12,
-        elevation: 2,
+        elevation: 0,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.06,
@@ -47,22 +47,22 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 6,
     },
     title: {
-        fontSize: 16,
-        color: '#374151',
+        fontSize: 18,
+        color: '#000',
     },
     value: {
         fontFamily: 'LoveYa',
-        fontSize: 36,
-        color: '#1f2937',
-        marginLeft:10,
+        fontSize: 22,
+        color: '#9B7B95',
+        paddingHorizontal:12
     },
     subtitle: {
         fontFamily: 'Inter',
-        fontSize: 13,
+        fontSize: 12,
         color: '#9ca3af',
+
     },
 });
 

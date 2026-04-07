@@ -1,8 +1,5 @@
 // src/app/index.tsx
-
-import { View, Text } from "react-native";
-import { Typography } from "@/src/styles";
-import Dashboard from "@/src/screens/Dashboard";
+import Dashboard from "@/src/screens/dashboard/Dashboard";
 
 export default function Index() {
 

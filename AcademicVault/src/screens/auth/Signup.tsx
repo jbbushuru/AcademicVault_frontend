@@ -1,19 +1,19 @@
-// src/screens/Login.tsx
+// src/app/Signup.tsx
 
-import LoginCard from "../components/logincard";
 import { SafeAreaView } from "react-native-safe-area-context";
-import useappstyles from "../styles";
+import useappstyles from "@/src/styles";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { useAuth } from "../context/AuthContext";
+import SignUpCard from "@/src/components/signupcard";
+import { useAuth } from "@/src/context/AuthContext";
 
-interface LoginProps {
-    onSwitchToSignup?: () => void;
+interface SignUpProps {
+    onSwitchToLogin?: () => void;
 }
 
-export default function Login({ onSwitchToSignup }: LoginProps){
+export default function SignUp({ onSwitchToLogin }: SignUpProps){
     const styles = useappstyles();
     const { login } = useAuth();
-
+    
     return(
         <SafeAreaView style={styles.authcontainer}>
             <KeyboardAvoidingView
@@ -24,9 +24,9 @@ export default function Login({ onSwitchToSignup }: LoginProps){
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             >
-            <LoginCard 
-              onSwitchToSignup={onSwitchToSignup} 
-              onLoginSuccess={(data) => login(data.token, data.profile)} 
+            <SignUpCard 
+              onSwitchToLogin={onSwitchToLogin}
+              onSignupSuccess={(data) => login(data.token, data.profile)}
             />    
             </ScrollView>
             </KeyboardAvoidingView>           

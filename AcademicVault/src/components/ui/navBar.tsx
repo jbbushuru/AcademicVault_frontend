@@ -1,19 +1,18 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from "react-native";
-import { User, LogOut, Lock, ChevronRight, LayoutDashboard, Circle } from "lucide-react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { User, LogOut, Lock, Circle } from "lucide-react-native";
 import { useAuth } from "@/src/context/AuthContext";
 import { useAcademic } from "@/src/context/AcademicContext";
-import { Typography, theme } from "@/src/styles";
-import { useRouter } from "expo-router";
 
 const NavBar = () => {
     const { logout, userProfile } = useAuth();
     const { currentContext, setCurrentContext } = useAcademic();
-    const router = useRouter();
-    const colors = theme();
 
+    const userName = userProfile?.firstName + " " + userProfile?.lastName || "User";
+    const userCourse = userProfile?.course || "Course";
     const userYear = userProfile?.year || 1;
-    const userSemester = userProfile?.semester || 1;
+    const userTerm = userProfile?.term || 1;
+    const academicLabel = userProfile?.academicSystem?.toUpperCase() || "TERM";
     const courseDuration = userProfile?.courseDuration || 4;
 
     const menuItems = [
@@ -23,10 +22,6 @@ const NavBar = () => {
             locked: userYear < (i + 1)
         }))
     ];
-
-    const handleAccountManagement = () => {
-        // router.push("/account"); // Screen to be created later as per user request
-    };
 
     return (
         <View style={{padding:20,paddingBottom:30}}>
@@ -38,9 +33,9 @@ const NavBar = () => {
                     </View>
                 </View>
                 <View style={styles.userInfo}>
-                    <Text style={styles.userName}>{userProfile?.name || "STUDENT ONE"}</Text>
-                    <Text style={styles.userCourse}>{userProfile?.course || "SOFTWARE ENGINEERING"}</Text>
-                    <Text style={styles.userDetails}>YEAR {userYear} | SEMESTER {userSemester}</Text>
+                    <Text style={{fontSize: 14,color: '#374151',textTransform: 'uppercase',fontFamily: 'InterBold',}}>{userName}</Text>
+                    <Text style={{fontSize: 18,color: '#000',fontWeight: 'bold',marginTop: 2,}}>{userCourse}</Text>
+                    <Text style={{fontSize: 14,color: '#6b7280',marginTop: 4,textTransform: 'uppercase',}}>{userYear} | {academicLabel} {userTerm}</Text>
                 </View>
             </View>
 
@@ -88,7 +83,6 @@ const NavBar = () => {
 
                 <TouchableOpacity 
                     style={styles.accountLink}
-                    onPress={handleAccountManagement}
                 >
                     <Text style={styles.accountText}>MANAGE YOUR VAULT ACCOUNT</Text>
                 </TouchableOpacity>

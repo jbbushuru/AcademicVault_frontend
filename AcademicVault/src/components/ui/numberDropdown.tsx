@@ -56,7 +56,7 @@ const NumberSelectorComponent = ({
     <Dropdown
       style={logincardstyles.input}
       placeholderStyle={[Typography.presets.subtitle,{color:"#b1b1b1"}]}
-      selectedTextStyle={Typography.presets.subtitle}
+      selectedTextStyle={[Typography.presets.subtitle,{fontSize:20}]}
       
       data={numberData}
       
