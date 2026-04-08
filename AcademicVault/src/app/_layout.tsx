@@ -12,12 +12,10 @@ import { AcademicProvider } from '../context/AcademicContext';
 import LoadingScreen from '@/src/screens/shared/Loader';
 import { TimetableProvider } from '../context/TimetableContext';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
   const { isLoggedIn, isLoading, isFetchingProfile } = useAuth();
-
   if (isLoading || isFetchingProfile) {
     return <LoadingScreen />;
   }
