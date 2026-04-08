@@ -8,6 +8,8 @@ interface OnboardingSettings {
     maxLessons: number;
     lessonDuration: number;
     firstLessonStartTime: number;
+    notificationsEnabled: boolean;
+    alertLeadTime: number;
 }
 
 interface TTOnboardingProps {
@@ -22,6 +24,8 @@ const TTOnboarding: React.FC<TTOnboardingProps> = ({ onComplete }) => {
         maxLessons: 0,
         lessonDuration: 0,
         firstLessonStartTime: 0,
+        notificationsEnabled: true,
+        alertLeadTime: 15,
     });
 
     const isComplete = 
@@ -65,6 +69,29 @@ const TTOnboarding: React.FC<TTOnboardingProps> = ({ onComplete }) => {
                         placeholder="Select start time"
                     />
                 </View>
+
+                <View style={[styles.onboardingSection, {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}]}>
+                    <Text style={[styles.onboardingLabel, { color: colors.text, marginBottom: 0 }]}>Enable Lesson Reminders</Text>
+                    <TouchableOpacity 
+                        style={[styles.toggleButton, tempSettings.notificationsEnabled ? styles.toggleOn : styles.toggleOff, { borderColor: colors.primary }]}
+                        onPress={() => setTempSettings(s => ({ ...s, notificationsEnabled: !s.notificationsEnabled }))}
+                    >
+                        <Text style={{ color: tempSettings.notificationsEnabled ? '#FFF' : colors.primary }}>
+                            {tempSettings.notificationsEnabled ? 'ON' : 'OFF'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                {tempSettings.notificationsEnabled && (
+                    <View style={styles.onboardingSection}>
+                        <Text style={[styles.onboardingLabel, { color: colors.text }]}>Remind me before class starts (minutes)</Text>
+                        <CustomDropdown
+                            data={[5, 10, 15, 30, 60].map(m => ({ label: `${m} mins`, value: m }))}
+                            onSelect={(value) => setTempSettings(s => ({ ...s, alertLeadTime: value }))}
+                            placeholder="Select lead time"
+                        />
+                    </View>
+                )}
 
                 <TouchableOpacity 
                     style={[
@@ -138,6 +165,19 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
     },
+    toggleButton: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+        borderWidth: 1.5,
+    },
+    toggleOn: {
+        backgroundColor: '#10B981',
+        borderColor: '#10B981',
+    },
+    toggleOff: {
+        backgroundColor: 'transparent',
+    }
 });
 
 export default TTOnboarding;

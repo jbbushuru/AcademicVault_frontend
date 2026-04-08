@@ -2,6 +2,18 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { useAcademic } from './AcademicContext';
+import * as Notifications from 'expo-notifications';
+
+// Configure how notifications appear when the app is in foreground
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true
+  }),
+});
 
 const SETTINGS_KEY = 'timetable_settings';
 const LESSONS_KEY = 'timetable_lessons';
@@ -21,6 +33,9 @@ export interface TimetableSettings {
     lessonDuration: number;
     firstLessonStartTime: number;
     hasOnboarded: boolean;
+    notificationsEnabled: boolean;
+    alertLeadTime: number;
+    updatedAt?: number;
 }
 
 export type TTView = 'Daily' | 'Weekly';
@@ -57,24 +72,41 @@ export const TimetableProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         maxLessons: 5,
         lessonDuration: 90,
         firstLessonStartTime: 8,
-        hasOnboarded: false
+        hasOnboarded: false,
+        notificationsEnabled: true,
+        alertLeadTime: 15
     });
 
     // Load persisted data (DB + Local fallback)
     useEffect(() => {
         const loadPersistedData = async () => {
             try {
-                // 1. Try DB first
+                // 1. Load Settings with Smart Merge
+                const savedSettingsStr = await SecureStore.getItemAsync(SETTINGS_KEY);
+                const localSettings = savedSettingsStr ? JSON.parse(savedSettingsStr) : null;
+
                 const dbSettingsRes = await fetchWithAuth('/api/timetable/settings');
                 if (dbSettingsRes.ok) {
                     const dbSettings = await dbSettingsRes.json();
-                    setSettings(dbSettings);
-                    // Update local cache too
-                    await SecureStore.setItemAsync(SETTINGS_KEY, JSON.stringify(dbSettings));
+                    
+                    const localUpdated = localSettings?.updatedAt || 0;
+                    const dbUpdated = new Date(dbSettings.updatedAt || 0).getTime();
+
+                    if (localSettings && localUpdated > dbUpdated) {
+                        // Phone is newer, PUSH to cloud
+                        setSettings(localSettings);
+                        fetchWithAuth('/api/timetable/settings', {
+                            method: 'PATCH',
+                            body: JSON.stringify(localSettings)
+                        }).catch(e => console.error('Background settings push failed', e));
+                    } else {
+                        // Cloud is newer (or same), pull from cloud
+                        setSettings(dbSettings);
+                        await SecureStore.setItemAsync(SETTINGS_KEY, JSON.stringify(dbSettings));
+                    }
                 } else {
                     // Fallback to local
-                    const savedSettings = await SecureStore.getItemAsync(SETTINGS_KEY);
-                    if (savedSettings) setSettings(JSON.parse(savedSettings));
+                    if (localSettings) setSettings(localSettings);
                 }
 
                 // 2. Load lessons with Smart Merge
@@ -157,9 +189,30 @@ export const TimetableProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (Object.keys(lessons).length > 0) persistLessons();
     }, [lessons]);
 
+    const rescheduleAllAlerts = async (currentSettings: TimetableSettings, currentLessons: Record<string, Record<number, LessonData>>) => {
+        await Notifications.cancelAllScheduledNotificationsAsync();
+        if (!currentSettings.notificationsEnabled) return;
+        
+        Object.keys(currentLessons).forEach(dateKey => {
+            Object.keys(currentLessons[dateKey]).forEach(slotStr => {
+                const slot = parseInt(slotStr);
+                const lesson = currentLessons[dateKey][slot];
+                if (lesson.unitName !== '__HIDDEN__') {
+                    // background async schedule
+                    scheduleLessonAlert(lesson, dateKey, slot, currentSettings).catch(console.error);
+                }
+            });
+        });
+    };
+
     const updateSettings = async (newSettings: Partial<TimetableSettings>) => {
-        const updated = { ...settings, ...newSettings };
+        const updated = { ...settings, ...newSettings, updatedAt: Date.now() };
         setSettings(updated);
+
+        // Process notification global toggle
+        if (newSettings.notificationsEnabled !== undefined || newSettings.alertLeadTime !== undefined) {
+            rescheduleAllAlerts(updated, lessons);
+        }
 
         // 1. Persist Locally
         try {
@@ -180,6 +233,51 @@ export const TimetableProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     const oneDayMs = 24 * 60 * 60 * 1000;
+
+    const scheduleLessonAlert = async (lesson: LessonData, dateKey: string, slot: number, currentSettings = settings) => {
+        if (!currentSettings.notificationsEnabled) return;
+        
+        const identifier = `${dateKey}_${slot}`;
+        await Notifications.cancelScheduledNotificationAsync(identifier);
+
+        const lessonDate = new Date(dateKey);
+        // Start time = firstLessonStartTime(hours) + (slot - 1) * duration(mins)
+        const lessonStartTimeMins = (currentSettings.firstLessonStartTime * 60) + ((slot - 1) * currentSettings.lessonDuration);
+        const triggerMins = lessonStartTimeMins - currentSettings.alertLeadTime;
+        
+        lessonDate.setHours(Math.floor(triggerMins / 60), triggerMins % 60, 0, 0);
+
+        // If it's in the past and doesn't repeat, don't schedule
+        if (lessonDate.getTime() < Date.now() && lesson.repeat === 'never') return;
+
+        let trigger: Notifications.NotificationTriggerInput = {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: lessonDate,
+        };
+        
+        if (lesson.repeat === 'weekly') {
+            trigger = {
+                type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+                weekday: lessonDate.getDay() + 1, // expo uses 1=Sunday, 7=Saturday
+                hour: lessonDate.getHours(),
+                minute: lessonDate.getMinutes(),
+                repeats: true,
+            };
+        }
+
+        await Notifications.scheduleNotificationAsync({
+            identifier,
+            content: {
+                title: 'Upcoming Lesson',
+                body: `${lesson.unitName} starts in ${currentSettings.alertLeadTime} minutes at ${lesson.venue || 'TBA'}`,
+            },
+            trigger,
+        });
+    };
+
+    const cancelLessonAlert = async (dateKey: string, slot: number) => {
+        await Notifications.cancelScheduledNotificationAsync(`${dateKey}_${slot}`);
+    };
 
     // Helper to get a stable key for each date
     const getDateKey = useCallback((date: Date) => {
@@ -263,6 +361,9 @@ export const TimetableProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         } catch (err) {
             console.error('Failed to sync lesson save', err);
         }
+
+        // 3. Schedule Alert
+        scheduleLessonAlert(timestampedLesson, targetKey, slot);
     };
 
     const removeLesson = async (slot: number, dateKey: string, dayLessons: Record<number, LessonData>, removeAll: boolean = false) => {
@@ -316,6 +417,9 @@ export const TimetableProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         } catch (err) {
             console.error('Failed to sync lesson removal', err);
         }
+        
+        // 3. Cancel Alert
+        cancelLessonAlert(cloudTargetKey, slot);
     };
 
     const resetTimetable = (onSuccess?: () => void) => {

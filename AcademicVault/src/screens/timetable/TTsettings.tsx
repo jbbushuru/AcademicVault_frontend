@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     ScrollView,
     Alert,
+    Switch,
 } from 'react-native';
 import {
     ChevronLeft,
@@ -19,6 +20,8 @@ import {
     Trash2,
     CalendarDays,
     Save,
+    Bell,
+    BellRing,
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme, Typography } from '@/src/styles';
@@ -149,6 +152,49 @@ function TTsettingsView({colors, router, isDark}: TTsettingsViewProps){
                         placeholder={`${draft.firstLessonStartTime}:00 AM`}
                     />
                 </View>
+
+                {/* Notifications Section */}
+                <View style={[styles.section, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+                    <View style={styles.sectionHeader}>
+                        <View style={[styles.iconCircle, { backgroundColor: '#10B981' + '15' }]}>
+                            <Bell size={18} color="#10B981" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={[styles.sectionTitle, { color: colors.text }]}>Lesson Reminders</Text>
+                            <Text style={[styles.sectionSubtitle, { color: colors.subtext }]}>
+                                Get notified before your classes start
+                            </Text>
+                        </View>
+                        <Switch
+                            value={draft.notificationsEnabled ?? true}
+                            onValueChange={(val) => updateDraft({ notificationsEnabled: val })}
+                            trackColor={{ false: colors.subtext + '50', true: '#10B981' + '80' }}
+                            thumbColor={draft.notificationsEnabled ? '#10B981' : '#f4f3f4'}
+                        />
+                    </View>
+                </View>
+
+                {/* Lead Time Section (only visible if notifications are ON) */}
+                {draft.notificationsEnabled && (
+                    <View style={[styles.section, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+                        <View style={styles.sectionHeader}>
+                            <View style={[styles.iconCircle, { backgroundColor: '#10B981' + '15' }]}>
+                                <BellRing size={18} color="#10B981" />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={[styles.sectionTitle, { color: colors.text }]}>Reminder Timing</Text>
+                                <Text style={[styles.sectionSubtitle, { color: colors.subtext }]}>
+                                    Minutes before class to alert you
+                                </Text>
+                            </View>
+                        </View>
+                        <CustomDropdown
+                            data={[5, 10, 15, 30, 60].map(m => ({ label: `${m} mins`, value: m }))}
+                            onSelect={value => updateDraft({ alertLeadTime: value })}
+                            placeholder={`${draft.alertLeadTime ?? 15} mins`}
+                        />
+                    </View>
+                )}
 
                 {/* Danger Zone */}
                 <View style={[styles.section, { backgroundColor: cardBg, borderColor: '#EF4444' + '25' }]}>
